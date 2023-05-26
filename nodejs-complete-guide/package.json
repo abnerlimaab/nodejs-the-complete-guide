@@ -13,5 +13,10 @@
     "body-parser": "^1.20.2",
     "express": "^4.18.2",
     "nodemon": "^2.0.22"
+  },
+  "dependencies": {
+    "ejs": "^3.1.9",
+    "express-handlebars": "^7.0.7",
+    "pug": "^3.0.2"
   }
 }
