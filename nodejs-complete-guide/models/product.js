@@ -16,6 +16,7 @@ module.exports = class Product {
   }
 
   save() {
+    this.id = Math.random().toString();
     Product.fetchAll((products) => {
       products.push(this);
       fs.writeFile(storePath, JSON.stringify(products), (err) => {
