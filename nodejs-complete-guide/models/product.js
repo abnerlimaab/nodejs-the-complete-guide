@@ -43,4 +43,11 @@ module.exports = class Product {
       }
     });
   }
+
+  static findById(id, cb) {
+    Product.fetchAll((products) => {
+      const product = products.find((p) => p.id === id);
+      cb(product);
+    });
+  }
 };
