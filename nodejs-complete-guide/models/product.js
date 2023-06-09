@@ -8,8 +8,11 @@ const fileName = "products.json";
 const storePath = path.join(storeDir, fileName);
 
 module.exports = class Product {
-  constructor(title) {
+  constructor(title, imageUrl, description, price) {
     this.title = title;
+    this.imageUrl = imageUrl;
+    this.description = description;
+    this.price = price;
   }
 
   save() {
