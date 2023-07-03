@@ -1,11 +1,23 @@
-const fs = require("fs");
-const path = require("path");
+const fs = require('fs');
+const path = require('path');
 
-const dir = require("../util/path");
+const Cart = require('./cart');
 
-const storeDir = path.join(dir, "data");
-const fileName = "products.json";
-const storePath = path.join(storeDir, fileName);
+const p = path.join(
+  path.dirname(process.mainModule.filename),
+  'data',
+  'products.json'
+);
+
+const getProductsFromFile = cb => {
+  fs.readFile(p, (err, fileContent) => {
+    if (err) {
+      cb([]);
+    } else {
+      cb(JSON.parse(fileContent));
+    }
+  });
+};
 
 module.exports = class Product {
   constructor(id, title, imageUrl, description, price) {
@@ -17,52 +29,45 @@ module.exports = class Product {
   }
 
   save() {
-    Product.fetchAll((products) => {
+    getProductsFromFile(products => {
       if (this.id) {
         const existingProductIndex = products.findIndex(
-          (p) => p.id === this.id
+          prod => prod.id === this.id
         );
         const updatedProducts = [...products];
-
         updatedProducts[existingProductIndex] = this;
-
-        fs.writeFile(storePath, JSON.stringify(updatedProducts), (err) => {
-          console.error(err);
+        fs.writeFile(p, JSON.stringify(updatedProducts), err => {
+          console.log(err);
         });
       } else {
         this.id = Math.random().toString();
-
         products.push(this);
-
-        fs.writeFile(storePath, JSON.stringify(products), (err) => {
-          console.error(err);
+        fs.writeFile(p, JSON.stringify(products), err => {
+          console.log(err);
         });
       }
+    });
+  }
+
+  static deleteById(id) {
+    getProductsFromFile(products => {
+      const product = products.find(prod => prod.id === id);
+      const updatedProducts = products.filter(prod => prod.id !== id);
+      fs.writeFile(p, JSON.stringify(updatedProducts), err => {
+        if (!err) {
+          Cart.deleteProduct(id, product.price);
+        }
+      });
     });
   }
 
   static fetchAll(cb) {
-    fs.readFile(storePath, (err, data) => {
-      if (err) {
-        fs.mkdir(storeDir, (err) => {
-          if (err) {
-            console.error("Error on create directory", err);
-            return cb([]);
-          }
-          fs.writeFile(storePath, "[]", (err) => {
-            console.error("Error on write file", err);
-            cb([]);
-          });
-        });
-      } else {
-        cb(JSON.parse(data));
-      }
-    });
+    getProductsFromFile(cb);
   }
 
   static findById(id, cb) {
-    Product.fetchAll((products) => {
-      const product = products.find((p) => p.id === id);
+    getProductsFromFile(products => {
+      const product = products.find(p => p.id === id);
       cb(product);
     });
   }
