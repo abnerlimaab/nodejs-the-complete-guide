@@ -1,14 +1,27 @@
 require("dotenv").config();
-const Sequelize = require("sequelize");
+const { MongoClient, ServerApiVersion } = require("mongodb");
 
-const sequelize = new Sequelize(
-  process.env.DATABASE_NAME,
-  process.env.DATABASE_USER,
-  process.env.DATABASE_PASSWORD,
-  {
-    dialect: "mysql",
-    host: "localhost",
-  }
-);
+const client = new MongoClient(process.env.MONGODB_URI, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
 
-module.exports = sequelize;
+async function run() {
+  console.log("Connecting to MongoDB...");
+  await client.connect();
+  console.log("Connected to MongoDB!");
+  await client.db("admin").command({ ping: 1 });
+  console.log("Pinged your deployment. You successfully connected to MongoDB!");
+  return;
+}
+
+const mongoConnect = (callback) =>
+  run()
+    .then(() => callback(client))
+    .catch(console.dir)
+    .finally(() => client.close());
+
+module.exports = mongoConnect;
