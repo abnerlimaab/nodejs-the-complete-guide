@@ -9,19 +9,30 @@ const client = new MongoClient(process.env.MONGODB_URI, {
   },
 });
 
+let _db;
+
 async function run() {
-  console.log("Connecting to MongoDB...");
   await client.connect();
-  console.log("Connected to MongoDB!");
   await client.db("admin").command({ ping: 1 });
-  console.log("Pinged your deployment. You successfully connected to MongoDB!");
-  return;
+  console.info("You successfully connected to MongoDB!");
+  _db = client.db();
 }
 
 const mongoConnect = (callback) =>
   run()
-    .then(() => callback(client))
-    .catch(console.dir)
+    .then(() => callback())
+    .catch((err) => {
+      throw err;
+    })
     .finally(() => client.close());
 
-module.exports = mongoConnect;
+const getDb = () => {
+  if (_db) {
+    return _db;
+  }
+  throw "No database found!";
+};
+
+exports.mongoConnect = mongoConnect;
+exports.getDb = getDb;
+
