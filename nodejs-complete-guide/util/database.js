@@ -1,38 +1,30 @@
 require("dotenv").config();
-const { MongoClient, ServerApiVersion } = require("mongodb");
-
-const client = new MongoClient(process.env.MONGODB_URI, {
-  serverApi: {
-    version: ServerApiVersion.v1,
-    strict: true,
-    deprecationErrors: true,
-  },
-});
+const mongodb = require('mongodb');
+const MongoClient = mongodb.MongoClient;
 
 let _db;
 
-async function run() {
-  await client.connect();
-  await client.db("admin").command({ ping: 1 });
-  console.info("You successfully connected to MongoDB!");
-  _db = client.db();
-}
-
-const mongoConnect = (callback) =>
-  run()
-    .then(() => callback())
-    .catch((err) => {
-      throw err;
+const mongoConnect = callback => {
+  MongoClient.connect(
+    process.env.MONGODB_URI
+  )
+    .then(client => {
+      console.log('Connected!');
+      _db = client.db();
+      callback();
     })
-    .finally(() => client.close());
+    .catch(err => {
+      console.log(err);
+      throw err;
+    });
+};
 
 const getDb = () => {
   if (_db) {
     return _db;
   }
-  throw "No database found!";
+  throw 'No database found!';
 };
 
 exports.mongoConnect = mongoConnect;
 exports.getDb = getDb;
-
