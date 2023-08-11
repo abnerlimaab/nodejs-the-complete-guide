@@ -11,9 +11,7 @@ class User {
 
   save() {
     const db = getDb();
-    return db
-      .collection("users")
-      .insertOne(this)
+    return db.collection("users").insertOne(this);
   }
 
   addToCart(product) {
@@ -31,12 +29,12 @@ class User {
     } else {
       updatedCartItems.push({
         productId: new mongodb.ObjectId(product._id),
-        quantity: newQuantity
+        quantity: newQuantity,
       });
     }
 
     const updatedCart = {
-      items: updatedCartItems
+      items: updatedCartItems,
     };
 
     const db = getDb();
@@ -52,7 +50,8 @@ class User {
   getCart() {
     const productIds = this.cart.items.map((i) => i.productId);
     const db = getDb();
-    return db.collection("products")
+    return db
+      .collection("products")
       .find({ _id: { $in: productIds } })
       .toArray()
       .then((products) => {
@@ -61,7 +60,7 @@ class User {
             ...p,
             quantity: this.cart.items.find(
               (i) => i.productId.toString() === p._id.toString()
-            ).quantity
+            ).quantity,
           };
         });
       });
@@ -72,11 +71,28 @@ class User {
       (item) => item.productId.toString() !== productId.toString()
     );
     const db = getDb();
-    return db.collection("users")
+    return db
+      .collection("users")
       .updateOne(
         { _id: new mongodb.ObjectId(this._id) },
         { $set: { cart: { items: updatedCartItems } } }
       );
+  }
+
+  addOrder() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .insertOne(this.cart)
+      .then((result) => {
+        this.cart = { items: [] };
+        return db
+          .collection("users")
+          .updateOne(
+            { _id: new mongodb.ObjectId(this._id) },
+            { $set: { cart: { items: [] } } }
+          );
+      });
   }
 
   static findById(userId) {
@@ -90,7 +106,7 @@ class User {
       })
       .catch((err) => {
         console.log(err);
-      })
+      });
   }
 }
 
