@@ -1,104 +1,117 @@
-const mongodb = require("mongodb");
-const { getDb } = require("../util/database");
+const mongoose = require("mongoose");
 
-class Product {
-  constructor(title, price, description, imageUrl, id, userId) {
-    this.title = title;
-    this.price = price;
-    this.description = description;
-    this.imageUrl = imageUrl;
-    this._id = id ? new mongodb.ObjectId(id) : undefined;
-    this.userId = userId;
-  }
+const Schema = mongoose.Schema;
 
-  save() {
-    const db = getDb();
+const productSchema = new Schema({
+  title: { type: String, required: true },
+  price: { type: Number, required: true },
+  description: { type: String, require: true },
+  imageUrl: { type: String, required: true },
+});
 
-    const updateOp = () => db.collection("products").updateOne({
-      _id: new mongodb.ObjectId(this._id),
-    }, {
-      $set: this,
-    });
+module.exports = mongoose.model("Product", productSchema);
 
-    const insertOp = () => db.collection("products").insertOne(this);
 
-    const dbOp = this._id
-      ? updateOp()
-      : insertOp();
+// const mongodb = require("mongodb");
 
-    return dbOp
-      .then((result) => {
-        console.log(result);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+// class Product {
+//   constructor(title, price, description, imageUrl, id, userId) {
+//     this.title = title;
+//     this.price = price;
+//     this.description = description;
+//     this.imageUrl = imageUrl;
+//     this._id = id ? new mongodb.ObjectId(id) : undefined;
+//     this.userId = userId;
+//   }
 
-  static fetchAll() {
-    const db = getDb();
-    return db
-      .collection("products")
-      .find()
-      .toArray()
-      .then((products) => {
-        console.log(products);
-        return products;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+//   save() {
+//     const db = getDb();
 
-  static findById(prodId) {
-    const db = getDb();
-    return db
-      .collection("products")
-      .find({ _id: new mongodb.ObjectId(prodId) })
-      .next()
-      .then((product) => {
-        console.log(product);
-        return product;
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
+//     const updateOp = () => db.collection("products").updateOne({
+//       _id: new mongodb.ObjectId(this._id),
+//     }, {
+//       $set: this,
+//     });
 
-  static deleteById(prodId) {
-    const db = getDb();
-    return db
-      .collection("products")
-      .deleteOne({ _id: new mongodb.ObjectId(prodId) })
-      .then((result) => {
-        console.log("Deleted");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }
-}
+//     const insertOp = () => db.collection("products").insertOne(this);
 
-// const Product = sequelize.define("product", {
-//   id: {
-//     type: Sequelize.INTEGER,
-//     autoIncrement: true,
-//     allowNull: false,
-//     primaryKey: true,
-//   },
-//   title: Sequelize.STRING,
-//   price: {
-//     type: Sequelize.DOUBLE,
-//     allowNull: false,
-//   },
-//   imageUrl: {
-//     type: Sequelize.STRING,
-//     allowNull: false,
-//   },
-//   description: {
-//     type: Sequelize.STRING,
-//     allowNull: false,
-//   },
-// });
+//     const dbOp = this._id
+//       ? updateOp()
+//       : insertOp();
 
-module.exports = Product;
+//     return dbOp
+//       .then((result) => {
+//         console.log(result);
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   }
+
+//   static fetchAll() {
+//     const db = getDb();
+//     return db
+//       .collection("products")
+//       .find()
+//       .toArray()
+//       .then((products) => {
+//         console.log(products);
+//         return products;
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   }
+
+//   static findById(prodId) {
+//     const db = getDb();
+//     return db
+//       .collection("products")
+//       .find({ _id: new mongodb.ObjectId(prodId) })
+//       .next()
+//       .then((product) => {
+//         console.log(product);
+//         return product;
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   }
+
+//   static deleteById(prodId) {
+//     const db = getDb();
+//     return db
+//       .collection("products")
+//       .deleteOne({ _id: new mongodb.ObjectId(prodId) })
+//       .then((result) => {
+//         console.log("Deleted");
+//       })
+//       .catch((err) => {
+//         console.log(err);
+//       });
+//   }
+// }
+
+// // const Product = sequelize.define("product", {
+// //   id: {
+// //     type: Sequelize.INTEGER,
+// //     autoIncrement: true,
+// //     allowNull: false,
+// //     primaryKey: true,
+// //   },
+// //   title: Sequelize.STRING,
+// //   price: {
+// //     type: Sequelize.DOUBLE,
+// //     allowNull: false,
+// //   },
+// //   imageUrl: {
+// //     type: Sequelize.STRING,
+// //     allowNull: false,
+// //   },
+// //   description: {
+// //     type: Sequelize.STRING,
+// //     allowNull: false,
+// //   },
+// // });
+
+// module.exports = Product;
