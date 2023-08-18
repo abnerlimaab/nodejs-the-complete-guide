@@ -42,7 +42,11 @@ exports.getCart = (req, res, next) => {
   req.user
     .populate("cart.items.productId")
     .then((user) => {
-      const products = user.cart.items.map((item) => item.productId);
+      const products = user.cart.items.map((item) => ({
+        ...item.productId._doc,
+        quantity: item.quantity,
+      }));
+
       res.render("shop/cart", {
         path: "/cart",
         pageTitle: "Your Cart",
@@ -91,9 +95,8 @@ exports.postOrder = (req, res, next) => {
 
       return order.save();
     })
-    .then(() => {
-      res.redirect("/orders");
-    });
+    .then(() => req.user.clearCart())
+    .then(() => res.redirect("/orders"));
 };
 
 exports.getOrders = (req, res, next) => {
